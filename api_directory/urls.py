@@ -19,5 +19,5 @@ from api_directory import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("healthcareworkers/read", views.healthcareworkers_read),
+    path("healthcareworkers/", views.healthcareworkers),
 ]
