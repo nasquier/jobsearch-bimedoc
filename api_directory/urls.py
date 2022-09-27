@@ -19,5 +19,6 @@ from api_directory import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("healthcareworker/<str:rpps_number>/", views.healthcareworker),
     path("healthcareworkers/", views.healthcareworkers),
 ]

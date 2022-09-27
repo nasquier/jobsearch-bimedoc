@@ -1,5 +1,3 @@
 *.pyc
-data/db
 .venv
-.env
 db.sqlite3
