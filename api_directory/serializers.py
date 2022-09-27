@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import HealthCareWorker
+from .models import HealthCareWorker, Organization
 
 
 class HealthCareWorkerSerializer(serializers.ModelSerializer):
@@ -10,4 +10,13 @@ class HealthCareWorkerSerializer(serializers.ModelSerializer):
             "last_name",
             "first_name",
             "profession_name",
+        ]
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = [
+            "finess",
+            "name",
         ]
