@@ -4,8 +4,53 @@ from .serializers import HealthCareWorkerSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+import requests
+
+directory_url = "https://6n1w6lwcmf.execute-api.eu-west-1.amazonaws.com/dev/"
+
+# Cannot access CloudSearch schema without a token
+# And CloudSearch crashes when one of the return fields asked is not in the schema
+# So instead of directly extracting our models fields,
+# we have to write the ones we know to be in the CloudSearch schema
+response_fields = [
+    "rpps_number",
+    "last_name",
+    "first_name",
+    "profession_name",
+    "finess",
+    "registered_name",
+]
 
 
+@api_view(["GET"])
+def search_directory(request, search_term):
+    if request.method != "GET":
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    response = requests.get(
+        url=directory_url,
+        params={
+            "q": search_term,
+            "return": ",".join(response_fields),
+            "size": 10000,
+        },
+    )
+    response_json = response.json()
+
+    if response.status_code != 200 or "error" in response_json:
+        return Response(
+            response_json.get("error", None), status=status.HTTP_424_FAILED_DEPENDENCY
+        )
+
+    formatted_response = [worker["fields"] for worker in response_json["hits"]["hit"]]
+    return JsonResponse(
+        formatted_response,
+        safe=False,
+        json_dumps_params={"indent": 4, "ensure_ascii": False},
+    )
+
+
+#  Classic REST CRUD for workers
 def get_worker_if_exists(rpps_number):
     try:
         worker = HealthCareWorker.objects.get(rpps_number=rpps_number)
@@ -63,6 +108,7 @@ def healthcareworker(request, rpps_number=None):
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+# Global respond processes
 def validate_save_respond(serializer):
     # Check serializer validity. Save and return 200 if ok.
     # Else send 400
