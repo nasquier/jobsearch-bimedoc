@@ -68,3 +68,23 @@ The endpoint only accepts POST requests and the body data must be JSON.
 
 ***<h3>Display health care workers in the database</h3>***
 To list all organization and their workers saved in the database so far, visit http://localhost:8000/list/. It will return a JSON object of all organizations and theirs workers identified by the organization's finess. The workers with no known organization should be at the top of the object.
+
+___
+
+**<h2>Bonus routes</h2>** 
+
+Two other endpoints are available to showcase what the Django REST framework is capable of in terms of GUI.  
+
+You can list all the workers in your database at http://localhost:8000/healthcareworkers/ (GET request only).
+
+A true REST CRUD API is also available at http://localhost:8000/healthcareworker/rpps_number where *rpps_number* is the rpps_number of the worker you try to manipulate. You can use this route and the Django REST framework GUI to manage workers with the standard REST protocol for **CRUD** :
+- POST to **c**reate
+- GET to **r**ead
+- PUT to **u**pdate
+- DELETE to **d**elete
+
+The parameters are like the ones in the route */add/* discussed sooner and must be formatted as JSON in the body request. 
+
+The *rpps_number* field of the body of the POST request will be ignored as the one in the endpoint route will be taken for the creation of the worker.
+
+**IMPORTANT**  : This route doesn't create or manage organization entry.
