@@ -55,7 +55,7 @@ ___
 
 **<h2>Using the API</h2>** 
 
-You can use your browser or your favourite API client to make simple HTTP request to the server
+You can use your browser or your favourite API client to make simple HTTP requests to the server.
 
 
 ***<h3>Search Bimedoc's directory</h3>***
