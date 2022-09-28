@@ -21,6 +21,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("search/<str:search_term>/", views.search_directory),
     path("add/", views.save_worker),
+    path("list/", views.list_workers),
     path("healthcareworker/<str:rpps_number>/", views.healthcareworker),
     path("healthcareworkers/", views.healthcareworkers),
 ]

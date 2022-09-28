@@ -116,13 +116,54 @@ def save_organization(request):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["GET"])
+def list_workers(request):
+    if request.method != "GET":
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    workers = HealthCareWorker.objects.all()
+    sort_by_organization = {"NOT_REGISTERED": {"workers": []}}
+
+    for worker in workers:
+        serialized_worker = HealthCareWorkerSerializer(worker).data
+        not_registered = True
+
+        for finess in worker.finess_list:
+            try:
+                organization = Organization.objects.get(finess=finess)
+            except Organization.DoesNotExist:
+                continue
+
+            not_registered = False
+
+            if finess not in sort_by_organization:
+                sort_by_organization[finess] = {
+                    "organization_name": organization.registered_name,
+                    "finess": finess,
+                    "workers": [],
+                }
+
+            sort_by_organization[finess]["workers"].append(serialized_worker)
+
+        if not_registered:
+            sort_by_organization["NOT_REGISTERED"]["workers"].append(serialized_worker)
+
+    return JsonResponse(
+        sort_by_organization,
+        safe=False,
+        json_dumps_params={"indent": 4, "ensure_ascii": False},
+    )
+
+
 #  Classic REST CRUD for workers
 @api_view(["GET"])
 def healthcareworkers(request):
     if request.method != "GET":
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
     workers = HealthCareWorker.objects.all()
     serializer = HealthCareWorkerSerializer(workers, many=True)
+
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -151,16 +192,20 @@ def healthcareworker(request, rpps_number: str = None):
 
     if request.method == "PUT":
         payload_rpps_number = request.data.get("rpps_number", None)
+
         if payload_rpps_number and payload_rpps_number != worker.rpps_number:
             # If rpps_number is in payload, check if an existing object has it
             payload_target = get_worker_if_exists(payload_rpps_number)
+
             if payload_target:
                 return response_already_exists(payload_target)
+
         serializer = HealthCareWorkerSerializer(worker, data=request.data)
         return save_if_valid_and_respond(serializer)
 
     if request.method == "DELETE":
         worker.delete()
+
         return Response(status=status.HTTP_200_OK)
 
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
