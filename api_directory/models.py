@@ -6,9 +6,9 @@ class HealthCareWorker(models.Model):
     last_name = models.CharField(max_length=100, default="", blank=True)
     first_name = models.CharField(max_length=100, default="", blank=True)
     profession_name = models.CharField(max_length=100, default="", blank=True)
-    organizations_finess = models.JSONField(default=list, blank=True)
+    finess_list = models.JSONField(default=list, blank=True)
 
 
 class Organization(models.Model):
     finess = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=100, default="", blank=True)
+    registered_name = models.CharField(max_length=100, default="", blank=True)

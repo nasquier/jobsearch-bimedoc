@@ -1,6 +1,6 @@
 from django.http import JsonResponse
-from .models import HealthCareWorker
-from .serializers import HealthCareWorkerSerializer
+from .models import HealthCareWorker, Organization
+from .serializers import HealthCareWorkerSerializer, OrganizationSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -67,14 +67,50 @@ def save_worker(request):
     rpps_number = data.get("rpps_number", None)
     worker = get_worker_if_exists(rpps_number)
 
-    serializer = HealthCareWorkerSerializer(worker, data)
+    if data.get("finess", False):
+        if worker:
+            # Add finess from payload to worker's finess
+            updated_list = worker.finess_list
+            updated_list.append(data["finess"])
+            worker.finess_list = list(set(updated_list))
+        else:
+            # Initialize finess list
+            data["finess_list"] = [data["finess"]]
+
+    # Update information with payload
+    serializer = HealthCareWorkerSerializer(worker, data=data)
+
     if serializer.is_valid():
-        # FORMAT finness
         serializer.save()
-        _save_organization(request)
+        save_organization_response = save_organization(request)
+        message = (
+            "Healt care worker and its organization have been added/updated successfully."
+            if save_organization_response.status_code == status.HTTP_200_OK
+            else "Health care worker added/updated, but organization missing or not recognized."
+        )
         return Response(message, status=status.HTTP_200_OK)
     else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
+def save_organization(request):
+    if request.method != "POST":
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    data = request.data
+    finess = data.get("finess", None)
+
+    try:
+        organization = Organization.objects.get(finess=finess)
+    except Organization.DoesNotExist:
+        organization = None
+
+    serializer = OrganizationSerializer(organization, data=data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(status=status.HTTP_200_OK)
+    else:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 

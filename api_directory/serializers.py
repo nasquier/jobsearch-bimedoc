@@ -10,6 +10,7 @@ class HealthCareWorkerSerializer(serializers.ModelSerializer):
             "last_name",
             "first_name",
             "profession_name",
+            "finess_list",
         ]
 
 
@@ -18,5 +19,5 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = Organization
         fields = [
             "finess",
-            "name",
+            "registered_name",
         ]
