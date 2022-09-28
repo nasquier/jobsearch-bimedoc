@@ -30,22 +30,23 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-To navigate through our database with a GUI, we create a super user :
+To initiate our database, we do our first data migration:
 
 ```bash
-python manage.py createsuperuser
+python3 manage.py migrate --run-syncdb
 ```
 
-To initiate our database, we do our first data migration :
+To navigate through our database with a GUI, we can create a super user via this prompt:
 
 ```bash
-python manage.py migrate
+python3 manage.py createsuperuser
 ```
 
-To run the Django server locally, we use :
+
+To run the Django server locally, we use:
 
 ```bash
-python manage.py runserver
+python3 manage.py runserver
 ```
 
 The server should now be running and you should be able to access the  <a href=http://localhost:8000/admin> admin back office </a> with the previously entered credentials.
@@ -77,7 +78,7 @@ Two other endpoints are available to showcase what the Django REST framework is 
 
 You can list all the workers in your database at http://localhost:8000/healthcareworkers/ (GET request only).
 
-A true REST CRUD API is also available at http://localhost:8000/healthcareworker/rpps_number where *rpps_number* is the rpps_number of the worker you try to manipulate. You can use this route and the Django REST framework GUI to manage workers with the standard REST protocol for **CRUD** :
+A true REST CRUD API is also available at http://localhost:8000/healthcareworker/rpps_number where *rpps_number* is the rpps_number of the worker you try to manipulate. You can use this route and the Django REST framework GUI to manage workers with the standard REST protocol for **CRUD**:
 - POST to **c**reate
 - GET to **r**ead
 - PUT to **u**pdate
@@ -87,4 +88,4 @@ The parameters are like the ones in the route */add/* discussed sooner and must 
 
 The *rpps_number* field of the body of the POST request will be ignored as the one in the endpoint route will be taken for the creation of the worker.
 
-**IMPORTANT**  : This route doesn't create or manage organization entry.
+**IMPORTANT**: This route doesn't create or manage organization entry.
