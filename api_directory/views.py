@@ -21,6 +21,14 @@ response_fields = [
     "registered_name",
 ]
 
+# Utils
+def get_worker_if_exists(rpps_number):
+    try:
+        worker = HealthCareWorker.objects.get(rpps_number=rpps_number)
+    except HealthCareWorker.DoesNotExist:
+        worker = None
+    return worker
+
 
 @api_view(["GET"])
 def search_directory(request, search_term):
@@ -50,15 +58,27 @@ def search_directory(request, search_term):
     )
 
 
+@api_view(["POST"])
+def save_worker(request):
+    if request.method != "POST":
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    data = request.data
+    rpps_number = data.get("rpps_number", None)
+    worker = get_worker_if_exists(rpps_number)
+
+    serializer = HealthCareWorkerSerializer(worker, data)
+    if serializer.is_valid():
+        # FORMAT finness
+        serializer.save()
+        _save_organization(request)
+        return Response(message, status=status.HTTP_200_OK)
+    else:
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
 #  Classic REST CRUD for workers
-def get_worker_if_exists(rpps_number):
-    try:
-        worker = HealthCareWorker.objects.get(rpps_number=rpps_number)
-    except HealthCareWorker.DoesNotExist:
-        worker = None
-    return worker
-
-
 @api_view(["GET"])
 def healthcareworkers(request):
     if request.method != "GET":
@@ -74,13 +94,13 @@ def healthcareworker(request, rpps_number=None):
 
     if request.method == "POST":
         if worker:
-            return respond_already_exists(worker)
+            return response_already_exists(worker)
 
         # Erase possible rpps_number in payload : we want the one in the url
         data = request.data
         data["rpps_number"] = rpps_number
         serializer = HealthCareWorkerSerializer(data=data)
-        return validate_save_respond(serializer)
+        return save_if_valid_and_respond(serializer)
 
     if not worker:
         # GET PUT and DELETE must access an existing object to work
@@ -97,9 +117,9 @@ def healthcareworker(request, rpps_number=None):
             # If rpps_number is in payload, check if an existing object has it
             payload_target = get_worker_if_exists(payload_rpps_number)
             if payload_target:
-                return respond_already_exists(payload_target)
+                return response_already_exists(payload_target)
         serializer = HealthCareWorkerSerializer(worker, data=request.data)
-        return validate_save_respond(serializer)
+        return save_if_valid_and_respond(serializer)
 
     if request.method == "DELETE":
         worker.delete()
@@ -109,9 +129,9 @@ def healthcareworker(request, rpps_number=None):
 
 
 # Global respond processes
-def validate_save_respond(serializer):
+def save_if_valid_and_respond(serializer):
     # Check serializer validity. Save and return 200 if ok.
-    # Else send 400
+    # Else return 400
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -119,7 +139,7 @@ def validate_save_respond(serializer):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-def respond_already_exists(model_object):
-    # Send already exists with the content of the existing object
+def response_already_exists(model_object):
+    # Return 303 with the content of the existing object
     serializer = HealthCareWorkerSerializer(model_object)
     return Response(serializer.data, status=status.HTTP_303_SEE_OTHER)
