@@ -1,11 +1,70 @@
-# **REQUIREMENTS**
+**<h1>Bimedoc directory API</h1>**
 
-- Docker version *20.10.18 +*  
-- Docker Compose version *v2.11.1 +*
+**<h2>Presentation</h2>**
+
+<p>
+This Django API allows a user to do several things (see <a href=./instructions.pdf>instructions.pdf</a> for details about this exercize):
+
+- search Bimedoc's cloud based health care workers directory
+- add a worker and its related organization (if any) to a database
+- display the organizations saved in the database so far, as well as workers registered with no organization
+
+</p>
+
+<p>
+In addition to the mandatory endpoints required for this exercize, a strandard REST CRUD API has been implemented to manipulate the workers entries, as well as a route to list all workers without their organization.
+</p>
+
+<p>
+The use of the django REST framework allows us to interact with the database with a GUI.
+</p>
 
 ___
 
-python manage.py runserver
+**<h2>Installation</h2>**
 
-python manage.py migrate
+You only need **pip** and **python3** to install the project depencies on your local setup and launch the server.
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+To navigate through our database with a GUI, we create a super user :
+
+```bash
 python manage.py createsuperuser
+```
+
+To initiate our database, we do our first data migration :
+
+```bash
+python manage.py migrate
+```
+
+To run the Django server locally, we use :
+
+```bash
+python manage.py runserver
+```
+
+The server should now be running and you should be able to access the  <a href=http://localhost:8000/admin> admin back office </a> with the previously entered credentials.
+
+___
+
+**<h2>Using the API</h2>** 
+
+You can use your browser or your favourite API client to make simple HTTP request to the server
+
+
+***<h3>Search Bimedoc's directory</h3>***
+
+This endpoint is located at http://localhost:8000/search/something/.  
+*something* can be any string you want to search through the AWS cloud search API. The endpoint only accepts GET requests and returns a JSON list of health care workers, with the mandatory and optionnal fields our database will consume.
+
+***<h3>Add health care worker to the database</h3>***
+You can copy one the previously searched workers data and send it as is (JSON data) to http://localhost:8000/add/. This endpoint will create a corresponding health care worker entry in our database if possible. If the data had a *finess* field, it will automatically create the corresponding organization entry with the name entered in the optionnal *registered_name* field.
+The endpoint only accepts POST requests and the body data must be JSON.
+
+***<h3>Display health care workers in the database</h3>***
+To list all organization and their workers saved in the database so far, visit http://localhost:8000/list/. It will return a JSON object of all organizations and theirs workers identified by the organization's finess. The workers with no known organization should be at the top of the object.
