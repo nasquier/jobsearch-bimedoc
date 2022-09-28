@@ -1,10 +1,12 @@
+import requests
 from django.http import JsonResponse
-from .models import HealthCareWorker, Organization
-from .serializers import HealthCareWorkerSerializer, OrganizationSerializer
+from django.db.models import Model
+from rest_framework.serializers import Serializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-import requests
+from .models import HealthCareWorker, Organization
+from .serializers import HealthCareWorkerSerializer, OrganizationSerializer
 
 directory_url = "https://6n1w6lwcmf.execute-api.eu-west-1.amazonaws.com/dev/"
 
@@ -22,7 +24,7 @@ response_fields = [
 ]
 
 # Utils
-def get_worker_if_exists(rpps_number):
+def get_worker_if_exists(rpps_number: str):
     try:
         worker = HealthCareWorker.objects.get(rpps_number=rpps_number)
     except HealthCareWorker.DoesNotExist:
@@ -31,7 +33,7 @@ def get_worker_if_exists(rpps_number):
 
 
 @api_view(["GET"])
-def search_directory(request, search_term):
+def search_directory(request, search_term: str):
     if request.method != "GET":
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -125,7 +127,7 @@ def healthcareworkers(request):
 
 
 @api_view(["POST", "GET", "PUT", "DELETE"])
-def healthcareworker(request, rpps_number=None):
+def healthcareworker(request, rpps_number: str = None):
     worker = get_worker_if_exists(rpps_number=rpps_number)
 
     if request.method == "POST":
@@ -165,7 +167,7 @@ def healthcareworker(request, rpps_number=None):
 
 
 # Global respond processes
-def save_if_valid_and_respond(serializer):
+def save_if_valid_and_respond(serializer: Serializer):
     # Check serializer validity. Save and return 200 if ok.
     # Else return 400
     if serializer.is_valid():
@@ -175,7 +177,7 @@ def save_if_valid_and_respond(serializer):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-def response_already_exists(model_object):
+def response_already_exists(model_object: Model):
     # Return 303 with the content of the existing object
     serializer = HealthCareWorkerSerializer(model_object)
     return Response(serializer.data, status=status.HTTP_303_SEE_OTHER)
