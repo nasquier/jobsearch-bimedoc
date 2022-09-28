@@ -170,14 +170,19 @@ def healthcareworkers(request):
 @api_view(["POST", "GET", "PUT", "DELETE"])
 def healthcareworker(request, rpps_number: str = None):
     worker = get_worker_if_exists(rpps_number=rpps_number)
+    data = request.data
 
     if request.method == "POST":
         if worker:
             return response_already_exists(worker)
 
         # Erase possible rpps_number in payload : we want the one in the url
-        data = request.data
         data["rpps_number"] = rpps_number
+
+        if data.get("finess", False):
+            # Initialize finess list
+            data["finess_list"] = [data["finess"]]
+
         serializer = HealthCareWorkerSerializer(data=data)
         return save_if_valid_and_respond(serializer)
 
@@ -191,7 +196,7 @@ def healthcareworker(request, rpps_number: str = None):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     if request.method == "PUT":
-        payload_rpps_number = request.data.get("rpps_number", None)
+        payload_rpps_number = data.get("rpps_number", None)
 
         if payload_rpps_number and payload_rpps_number != worker.rpps_number:
             # If rpps_number is in payload, check if an existing object has it
@@ -200,7 +205,13 @@ def healthcareworker(request, rpps_number: str = None):
             if payload_target:
                 return response_already_exists(payload_target)
 
-        serializer = HealthCareWorkerSerializer(worker, data=request.data)
+            if data.get("finess", False):
+                # Add finess from payload to worker's finess
+                updated_list = worker.finess_list
+                updated_list.append(data["finess"])
+                data["finess_list"] = list(set(updated_list))
+
+        serializer = HealthCareWorkerSerializer(worker, data=data)
         return save_if_valid_and_respond(serializer)
 
     if request.method == "DELETE":
