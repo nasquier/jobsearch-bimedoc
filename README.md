@@ -16,7 +16,7 @@ In addition to the mandatory endpoints required for this exercize, a strandard R
 </p>
 
 <p>
-The use of the django REST framework allows us to interact with the database with a GUI.
+The use of the Django REST framework allows us to interact with the database with a GUI.
 </p>
 
 ___
@@ -78,7 +78,7 @@ Two other endpoints are available to showcase what the Django REST framework is 
 
 You can list all the workers in your database at http://localhost:8000/healthcareworkers/ (GET request only).
 
-A true REST CRUD API is also available at http://localhost:8000/healthcareworker/rpps_number where *rpps_number* is the rpps_number of the worker you try to manipulate. You can use this route and the Django REST framework GUI to manage workers with the standard REST protocol for **CRUD**:
+A true REST CRUD API is also available at http://localhost:8000/healthcareworker/rpps_number/ where *rpps_number* is the rpps_number of the worker you try to manipulate. You can use this route and the Django REST framework GUI to manage workers with the standard REST protocol for **CRUD**:
 - POST to **c**reate
 - GET to **r**ead
 - PUT to **u**pdate
